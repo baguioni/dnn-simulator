@@ -1,12 +1,13 @@
 #include "dram.hpp"
 
-DRAM::DRAM(std::string name, float accelerator_frequency, int channel, int rank) {
+DRAM::DRAM(std::string name, float accelerator_frequency, int channel, int rank, InterconnectRouter *router) {
     // Initialize DRAM configuration
     this->name = name;
     this->frequency = GetFrequencyByName(name);
     this->accelerator_frequency = accelerator_frequency;
     this->channel = channel;
     this->rank = rank;
+    this->router = router;
 
     // Initialize statistics
     this->idle_cycle = 0;
@@ -15,8 +16,7 @@ DRAM::DRAM(std::string name, float accelerator_frequency, int channel, int rank)
     this->total_fetched_data = 0;
 
     // Initialize queues
-    this->incoming_request_queue = new std::vector<request>;
-    this->outgoing_request_queue = new std::vector<request>;
+    this->request_queue = new std::vector<request>;
     // weight_tile_queue = new std::vector<tile>;
     this->activation_tile_queue = new std::vector<tile>;
 
@@ -24,7 +24,7 @@ DRAM::DRAM(std::string name, float accelerator_frequency, int channel, int rank)
 }
 
 void DRAM::ReceiveRequest(request req) {
-    incoming_request_queue->push_back(req);
+    request_queue->push_back(req);
 }
 
 void DRAM::ReceiveTile(tile t) {
@@ -32,13 +32,13 @@ void DRAM::ReceiveTile(tile t) {
 }
 
 bool DRAM::IsIdle() {
-    return (incoming_request_queue->empty());
+    return (request_queue->empty());
 }
 
 // Check if we are pulling data from DRAM
 void DRAM::Cycle() {
     // DRAM is not doing anything
-    if (stall_cycle == 0 && incoming_request_queue->empty()) {
+    if (stall_cycle == 0 && request_queue->empty()) {
         idle_cycle++;
         return;
     }
@@ -53,16 +53,16 @@ void DRAM::Cycle() {
 
     // DRAM has finished fetching data and ready to send
     if (stall_cycle == 0) {
-        request req = incoming_request_queue->front();
-        pop_front(*incoming_request_queue);
-        outgoing_request_queue->push_back(MakeRequest(req.order, req.size));
+        request req = request_queue->front();
+        pop_front(*request_queue);
+        router->ReceiveRequest(MakeRequest(req.order, req.size, req.buffer_id));
         total_fetched_data += (float)req.size;
     }
 }
 
 int DRAM::CalculateDRAMCycles() {
     // Find the tile of the next request
-    int order = incoming_request_queue->front().order;
+    int order = request_queue->front().order;
     tile found_tile;
     bool found = false;
 
@@ -233,10 +233,12 @@ float DRAM::GetFrequencyByName(std::string name) {
 }
 
 void DRAM::PrintStatistics() {
+    std::cout << "======================================================================" << std::endl;
     std::cout << "DRAM statistics:" << std::endl;
-    std::cout << "  Total cycles: " << idle_cycle + busy_cycle << std::endl;
-    std::cout << "  Idle cycles: " << idle_cycle << std::endl;
-    std::cout << "  Busy cycles: " << busy_cycle << std::endl;
-    std::cout << "  Stall cycles: " << stall_cycle << std::endl;
+    std::cout << "  Idle cycles: " << idle_cycle << "  Busy cycles: " << busy_cycle << std::endl;
+    std::cout << "  Total cycles: " << idle_cycle + busy_cycle << "  Idle percentage: " 
+            << (static_cast<float>(idle_cycle) / (idle_cycle + busy_cycle)) * 100 << "%" << std::endl;
     std::cout << "  Total fetched data: " << total_fetched_data << " bytes" << std::endl;
+    std::cout << "======================================================================" << std::endl;
+
 }

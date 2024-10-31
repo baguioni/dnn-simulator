@@ -4,6 +4,7 @@
 #include <vector>
 
 struct request {
+    int buffer_id; // ID of the buffer
     int order; // Order of the tile
     float size; // Size of the tile (Height * Width)
 };
@@ -18,7 +19,7 @@ struct tile {
     int total_height; // Total height of the original matrix
 };
 
-request MakeRequest(int order, float size);
+request MakeRequest(int order, float size, int buffer_id);
 tile MakeTile(int order, unsigned int starting_address, int jump_size, int tile_width, int tile_height, int total_width, int total_height);
 void pop_front(std::vector<request> &v);
 

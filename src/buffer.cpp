@@ -1,8 +1,9 @@
 #include "buffer.hpp"
 
 // Buffer gets memory (weights or activation1) from DRAM and sends it to the accelerator
-Buffer::Buffer(float capacity) {
+Buffer::Buffer(int id, float capacity) {
     this->capacity = capacity;
+    this->id = id;
 
     // Buffer-Router queues
     this->incoming_request_queue = new std::vector<request>; // Router adds requests to this queue
@@ -27,6 +28,10 @@ Buffer::Buffer(float capacity) {
 
 float Buffer::GetCapacity() {
     return capacity;
+}
+
+int Buffer::GetId() {
+    return id;
 }
 
 std::vector<request> *Buffer::GetIncomingRequestQueue() {

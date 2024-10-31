@@ -1,14 +1,13 @@
 #include "common.hpp"
 
-request MakeRequest(int order, float size) {
+request MakeRequest(int order, float size, int buffer_id) {
     request req;
     req.order = order;
     req.size = size;
+    req.buffer_id = buffer_id;
 
     return req;
 };
-
-
 
 tile MakeTile(int order, unsigned int starting_address, int jump_size, int tile_width, int tile_height, int total_width, int total_height) {
     tile t;

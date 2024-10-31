@@ -6,6 +6,7 @@
 class Buffer {
     private:
         float capacity;
+        int id;
         // Buffer-Compute queues (Requested by router) 
         std::vector<request> *incoming_request_queue; // Data that is waiting to be sent to compute unit
         std::vector<request> *outgoing_request_queue; // Data that is was already sent to compute unit
@@ -16,13 +17,14 @@ class Buffer {
 
 
     public:
-        Buffer(float capacity);
+        Buffer(int id, float capacity);
         void Cycle();
         float GetCapacity();
         std::vector<request> *GetIncomingRequestQueue();
         std::vector<request> *GetOutgoingRequestQueue();
         std::vector<request> *GetWaitingRequestQueue();
         std::vector<request> *GetServedRequestQueue();
+        int GetId();
 };
 
 #endif

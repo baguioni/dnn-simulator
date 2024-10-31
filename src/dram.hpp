@@ -11,20 +11,23 @@
 #include <iomanip>
 #include <regex>
 #include "common.hpp"
+#include "interconnect_router.hpp"
+
+class InterconnectRouter;
 
 class DRAM {
     private:
         int channel, rank; // DRAM configuration
         int idle_cycle, busy_cycle, stall_cycle; // Statistics
         float total_fetched_data, frequency, accelerator_frequency; // in MHz
+        InterconnectRouter *router;
         std::string name;
-        std::vector<request> *incoming_request_queue; // Queue of incoming memory requests, i.e. data that is being fetched
-        std::vector<request> *outgoing_request_queue; // Queue of outgoing memory requests, i.e. data that is being sent
+        std::vector<request> *request_queue; 
         // std::vector<tile> *weight_tile_queue; // Queue of weight tiles to be fetched
         std::vector<tile> *activation_tile_queue; // Queue of input tiles to be fetched
 
     public:
-        DRAM(std::string name, float accelerator_frequency, int channel, int rank);
+        DRAM(std::string name, float accelerator_frequency, int channel, int rank, InterconnectRouter *router);
         // DRAM functions
         void Cycle();
         bool IsIdle();
@@ -38,11 +41,9 @@ class DRAM {
         int ParseRamulatorOutput(const std::string& fileName);
         void GenerateInstructionTrace(tile t);
 
-        std::vector<request> *GetIncomingRequestQueue() {return incoming_request_queue;};
-        std::vector<request> *GetOutgoingRequestQueue() {return outgoing_request_queue;};
         // std::vector<tile> *GetWeightTileQueue() {return weight_tile_queue;};
         std::vector<tile> *GetInputTileQueue() {return activation_tile_queue;};
-
+        std::vector<request> *GetRequestQueue() {return request_queue;};
         void PrintStatistics();
 };
 

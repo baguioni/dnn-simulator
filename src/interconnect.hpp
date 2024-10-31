@@ -10,35 +10,31 @@
 
 class Interconnect {
     private:
-        Buffer *buffer;
-        DRAM *dram;
-
         // properties
+        int buffer_id;
         float clock;
         float bandwidth;
         float bytes_per_cycle;
+
+        float request_total_bytes = 0.0;
+        bool new_request = true;
 
         // stats
         float total_bytes_sent;
         int idle_cycles;
         int busy_cycles;
 
-        // DRAM queues
+        std::vector<request> *request_queue;
         std::vector<request> *dram_incoming_request_queue;     
+        std::vector<request> *buffer_served_request_queue;
         
-        // Buffer queues
-        std::vector<request> *buffer_served_request_queue;     // vector of requests that the receiver has been serviced
-        std::vector<request> *buffer_waiting_request_queue;    // vector of requests that the receiver has to receive from sender
-        
-        // Controller queues
-        std::vector<request> *controller_request_queue;
 
     public:
-        Interconnect(Buffer *buffer, DRAM *dram, Controller *controller, float clock, float bandwidth);
+        Interconnect(Buffer *buffer, float clock, float bandwidth);
         void Cycle();
+        void ReceiveRequest(request req);
         bool IsIdle();
-        void PrintStatistics();
-        void SendRequestToDRAM(request req);
+        void PrintStatistics();      
 };
 
 #endif
