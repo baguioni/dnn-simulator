@@ -11,6 +11,7 @@
 class Interconnect {
     private:
         // properties
+        Buffer *buffer;
         int buffer_id;
         float clock;
         float bandwidth;
@@ -34,6 +35,7 @@ class Interconnect {
         void Cycle();
         void ReceiveRequest(request req);
         bool IsIdle();
+        bool WillBufferBeFull(float request_size);
         void PrintStatistics();      
 };
 

@@ -11,8 +11,8 @@ class InterconnectRouter;
 
 class Controller {
     private:
-        int compute_unit_width;
-        int compute_unit_height;
+        int tile_width;
+        int tile_height;
         int order_id;
         int num_buffers;
 
@@ -21,7 +21,7 @@ class Controller {
         std::vector<request> *interconnect_request_queue;
 
     public:
-        Controller(DRAM *dram, InterconnectRouter *router, int compute_unit_width, int compute_unit_height);
+        Controller(DRAM *dram, InterconnectRouter *router, int tile_width, int tile_height);
         void TilePartitioning(int H, int W, bool is_format_nchw, int channel, unsigned int starting_address);
         void PushTileRequest(tile t, int buffer_id);
 };

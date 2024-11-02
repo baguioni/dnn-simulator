@@ -8,8 +8,8 @@ int main (void) {
     float clock = 0.7; // 700MHz
     float bandwidth_dram_buffer = 1 * (float)((1 << 30) / 1000000000); // 1GiB/s
     float buffer_size = (float)(3 * (1 << 22));
-    int compute_unit_width = 32;
-    int compute_unit_height = 32;
+    int tile_width = 32;
+    int tile_height = 32;
 
     Buffer *buffer = new Buffer(0, buffer_size);
     Interconnect *interconnect = new Interconnect(buffer, clock, bandwidth_dram_buffer);
@@ -17,9 +17,9 @@ int main (void) {
     interconnect_list->push_back(interconnect);
     InterconnectRouter *router = new InterconnectRouter(interconnect_list);
     DRAM *dram = new DRAM("DDR4_2400R", clock, 1, 1, router);
-    Controller *controller = new Controller(dram, router, compute_unit_width, compute_unit_height);
+    Controller *controller = new Controller(dram, router, tile_width, tile_height);
 
-    std::cout << "Compute Unit Size: " << compute_unit_width << "x" << compute_unit_height << std::endl;
+    std::cout << "Tile Size: " << tile_width << "x" << tile_height << std::endl;
     std::cout << "System Clock: " << clock << "GHz" << std::endl;
     std::cout << "DRAM Bandwidth: " << bandwidth_dram_buffer << "GiB/s" << std::endl;
     // Partition the input tensor into tiles

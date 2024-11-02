@@ -1,7 +1,8 @@
-#include "interconnect.hpp"
+#include "router.hpp"
 
-Interconnect::Interconnect(Buffer *buffer, float clock, float bandwidth) {
+Router::Router(Buffer *buffer, float clock, float bandwidth, RoutingStrategy routing_strategy) {
     this->buffer = buffer;
+    this->routing_strategy = routing_strategy;
     this->buffer_id = buffer->GetId();
     this->clock = clock;
     this->bandwidth = bandwidth;
@@ -13,15 +14,53 @@ Interconnect::Interconnect(Buffer *buffer, float clock, float bandwidth) {
 
     this->request_queue = new std::vector<request>;
     this->buffer_served_request_queue = buffer->GetServedRequestQueue();
-
 }
 
-void Interconnect::Cycle() {
-    if (request_queue->empty() || WillBufferBeFull(request_queue->front().size)) {
+void Router::Cycle() {
+    if (buffer_served_request_queue->empty() || request_queue->empty()) {
         idle_cycles++;
     } else {
-        busy_cycles++;
+        int num_cycles = 1;
+        std::vector<request>::iterator bsrq_it;
 
+        for (bsrq_it = buffer_served_request_queue->begin(); bsrq_it != buffer_served_request_queue->end(); ++bsrq_it) {
+            if (request_queue->front().order == bsrq_it->order) {
+                num_cycles = CalculateBusyCycles();
+                break;
+            }
+        }
+
+        busy_cycles += num_cycles;
+    }
+}
+
+/*
+    Each subfunction should:
+        - Update total_bytes_sent
+        - Pop the front of the request_queue
+        - Return the number of cycles it took to prepare and send the data
+*/
+int Router::CalculateBusyCycles() {
+    /*
+        Output formula [(W−K+2P)/S]+1.
+
+        W is the input volume - in your case 128
+        K is the Kernel size - in your case 5
+        P is the padding - in your case 0 i believe
+        S is the stride - which you have not provided. I will assume it is 1
+    */
+    if (routing_strategy == SLIDING_WINDOW_3x3) {
+
+        // Given an input tile and kernel size
+        // Plus 1 to account for the last cycle
+        const int PROCESSING_CYCLES = 9;
+        request req = request_queue->front();
+        int tile_size = (int) std::sqrt(req.size);
+        int output_size = tile_size - 3 + 1;
+        pop_front(*request_queue);
+        return output_size * output_size * PROCESSING_CYCLES;
+    } else {
+        // Default strategy
         int order = request_queue->front().order;
         float bytes_to_send = request_queue->front().size;
 
@@ -48,25 +87,13 @@ void Interconnect::Cycle() {
             // Finished sending data to the buffer
             buffer_served_request_queue->push_back(MakeRequest(order, request_total_bytes, buffer_id));
         }
+        return 1;
     }
 }
 
-// Checks if current buffer + next request size is greater than the buffer's capacity
-bool Interconnect::WillBufferBeFull(float request_size) {
-    return (buffer->GetCurrentSize() + request_size > buffer->GetMaxCapacity());
-}
-
-void Interconnect::ReceiveRequest(request req) {
-    request_queue->push_back(req);
-}
-
-bool Interconnect::IsIdle() {
-    return (request_queue->empty());
-}
-
-void Interconnect::PrintStatistics() {
+void Router::PrintStatistics() {
     std::cout << "======================================================================" << std::endl;
-    std::cout << "Interconnect statistics -> " << "Buffer " << buffer_id << " :" <<std::endl;
+    std::cout << "Buffer " << buffer_id <<" -> Router -> Compute Unit statistics:" << std::endl;
     std::cout << "  Idle cycles: " << idle_cycles << "  Busy cycles: " << busy_cycles << std::endl;
     std::cout << "  Total cycles: " << idle_cycles + busy_cycles << "  Idle percentage: " 
             << (static_cast<float>(idle_cycles) / (idle_cycles + busy_cycles)) * 100 << "%" << std::endl;

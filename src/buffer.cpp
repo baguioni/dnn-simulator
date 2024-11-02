@@ -1,8 +1,8 @@
 #include "buffer.hpp"
 
 // Buffer gets memory (weights or activation1) from DRAM and sends it to the accelerator
-Buffer::Buffer(int id, float capacity) {
-    this->capacity = capacity;
+Buffer::Buffer(int id, float size) {
+    this->size = size;
     this->id = id;
 
     // Buffer-Router queues
@@ -10,7 +10,6 @@ Buffer::Buffer(int id, float capacity) {
     this->outgoing_request_queue = new std::vector<request>; // Buffer sends requests to the Compute Unit
 
     // Dram-Buffer queues
-    this->waiting_request_queue = new std::vector<request>; // Dram.incoming_request_queue
     this->served_request_queue = new std::vector<request>; // Dram.outgoing_request_queue
 }
 
@@ -26,8 +25,21 @@ Buffer::Buffer(int id, float capacity) {
 
 // }
 
-float Buffer::GetCapacity() {
-    return capacity;
+float Buffer::GetMaxCapacity() {
+    return size;
+}
+
+float Buffer::GetCurrentSize() {
+    if (served_request_queue->empty()) {
+        return 0.0f;
+    }
+
+    float totalSize = 0.0f;
+    
+    for (const auto& request : *served_request_queue) {
+        totalSize += request.size;
+    }
+    return totalSize;
 }
 
 int Buffer::GetId() {
@@ -40,10 +52,6 @@ std::vector<request> *Buffer::GetIncomingRequestQueue() {
 
 std::vector<request> *Buffer::GetOutgoingRequestQueue() {
     return outgoing_request_queue;
-}
-
-std::vector<request> *Buffer::GetWaitingRequestQueue() {
-    return waiting_request_queue;
 }
 
 std::vector<request> *Buffer::GetServedRequestQueue() {
