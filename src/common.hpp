@@ -2,6 +2,8 @@
 #define COMMON_H
 
 #include <vector>
+#include <cmath>
+#include <iostream>
 
 struct request {
     int buffer_id; // ID of the buffer

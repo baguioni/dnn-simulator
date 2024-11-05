@@ -46,7 +46,8 @@ void DRAM::Cycle() {
     // Bringing data from DRAM
     if (stall_cycle == 0) {
         stall_cycle = CalculateDRAMCycles();
-    // std::cout << stall_cycle << std::endl;
+
+        // std::cout << stall_cycle << std::endl;
     }
     stall_cycle--;
     busy_cycle++;
@@ -233,12 +234,11 @@ float DRAM::GetFrequencyByName(std::string name) {
 }
 
 void DRAM::PrintStatistics() {
-    std::cout << "======================================================================" << std::endl;
     std::cout << "DRAM statistics:" << std::endl;
-    std::cout << "  Idle cycles: " << idle_cycle << "  Busy cycles: " << busy_cycle << std::endl;
-    std::cout << "  Total cycles: " << idle_cycle + busy_cycle << "  Idle percentage: " 
-            << (static_cast<float>(idle_cycle) / (idle_cycle + busy_cycle)) * 100 << "%" << std::endl;
-    std::cout << "  Total fetched data: " << total_fetched_data << " bytes" << std::endl;
-    std::cout << "======================================================================" << std::endl;
+    std::cout << "\tIdle cycles: " << idle_cycle << std::endl;
+    std::cout << "\tBusy cycles: " << busy_cycle << std::endl;
+    std::cout << "\tTotal cycles: " << idle_cycle + busy_cycle << std::endl;
+    std::cout << "\tIdle percentage: " << (static_cast<float>(idle_cycle) / (idle_cycle + busy_cycle)) * 100 << "%" << std::endl;
+    std::cout << "\tTotal fetched data: " << total_fetched_data << " bytes" << std::endl;
 
 }

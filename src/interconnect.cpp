@@ -65,11 +65,10 @@ bool Interconnect::IsIdle() {
 }
 
 void Interconnect::PrintStatistics() {
-    std::cout << "======================================================================" << std::endl;
     std::cout << "Interconnect statistics -> " << "Buffer " << buffer_id << " :" <<std::endl;
-    std::cout << "  Idle cycles: " << idle_cycles << "  Busy cycles: " << busy_cycles << std::endl;
-    std::cout << "  Total cycles: " << idle_cycles + busy_cycles << "  Idle percentage: " 
-            << (static_cast<float>(idle_cycles) / (idle_cycles + busy_cycles)) * 100 << "%" << std::endl;
-    std::cout << "  Total fetched data: " << total_bytes_sent << " bytes" << std::endl;
-    std::cout << "======================================================================" << std::endl;
+    std::cout << "\tIdle cycles: " << idle_cycles << std::endl;
+    std::cout << "\tBusy cycles: " << busy_cycles << std::endl;
+    std::cout << "\tTotal cycles: " << idle_cycles + busy_cycles << std::endl;
+    std::cout << "\tIdle percentage: " << (static_cast<float>(idle_cycles) / (idle_cycles + busy_cycles)) * 100 << "%" << std::endl;
+    std::cout << "\tTotal fetched data: " << total_bytes_sent << " bytes" << std::endl;
 }

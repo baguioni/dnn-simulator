@@ -14,7 +14,6 @@ Controller::Controller(DRAM *dram, InterconnectRouter *router, int tile_width, i
 void Controller::TilePartitioning(int H, int W, bool is_format_nchw, int channel, unsigned int starting_address) {
     int current_buffer = 0;
     unsigned int tile_start_address;
-    int tile_width, tile_height;
     int num_h_tiles = int((H-1)/tile_height) + 1;
     int num_w_tiles = int((W-1)/tile_width) + 1;
 
